@@ -90,7 +90,23 @@ class ProductoController {
 
       let codigo = params.codigo
 
-      const producto = await Database.raw("select id, trim(codigointerno), trim(codigobarra), pvp1, pvp2, ucosto, trim(descripcion) from public.producto where codigointerno='" + codigo + "' ")
+      const producto = await Database.raw("select * from public.producto where codigointerno='" + codigo + "' and estado = true")
+
+      return response.status(200).send({
+        producto: producto.rows
+      })
+
+    } catch (error) {
+      return error
+    }
+  }
+
+  async consultarProductoFiltroID({params, response}) {
+    try {
+
+      let codigo = params.codigo
+
+      const producto = await Database.raw("select * from public.producto where id='" + codigo + "' and estado = true")
 
       return response.status(200).send({
         producto: producto.rows
@@ -103,7 +119,7 @@ class ProductoController {
 
   async consultarProducto({response}) {
     try {
-      const producto = await Database.raw("select * from public.producto")
+      const producto = await Database.raw("select * from public.producto where estado = true")
       return response.status(200).send({
         producto: producto.rows
       })
@@ -117,7 +133,7 @@ class ProductoController {
     let codigo = params.codigo
     try {
       const existe = await Database.raw("select id, codigointerno from public.producto where codigointerno='" + codigo + "' ")
-      if (existe.rows.length > 1) {
+      if (existe.rows.length > 0) {
         const producto = await Database.raw("update public.producto set estado = false where codigointerno = '" + codigo + "'")
 
         return response.status(200).send({
@@ -141,12 +157,12 @@ class ProductoController {
   async modificarProducto({request, params, response}) {
     try {
       let idproducto = params.idproducto
-      let codigointerno = request.input('codigointerno')
+      // let codigointerno = request.input('codigointerno')
       let codigobarra = request.input('codigobarra')
       let pvp1 = request.input('pvp1')
       let pvp2 = request.input('pvp2')
       let ucosto = request.input('ucosto')
-      /*  let existencia = request.input('existencia') */
+      // let existencia = request.input('existencia')
       let descripcion = request.input('descripcion')
       let codmarca = request.input('codmarca')
       let tieneiva = request.input('tieneiva')
@@ -156,14 +172,14 @@ class ProductoController {
       let porcentajeice = request.input('porcentajeice')
       let exis_minima = request.input('exis_minima')
       let exis_maxima = request.input('exis_maxima') 
-      /* let fechaucompra = request.input('fechaucompra')
-      let fechauventa = request.input('fechauventa')  */
+      // let fechaucompra = request.input('fechaucompra')
+      // let fechauventa = request.input('fechauventa') 
       let codmedida = request.input('codmedida')
       let idcategoria = request.input('idcategoria')
       let estado = request.input('estado')
       /* let fechainventario = request.input('fechainventario')
       let inventariado = request.input('inventariado') */
-      let fechamod = request.input('fechamod')
+      let fechamod = moment().format('YYYY-MM-DD')
       let multiplos = request.input('multiplos')
       let nota = request.input('nota')
       let costopromedio = request.input('costopromedio')
@@ -183,9 +199,12 @@ class ProductoController {
       let diasxllegarproducto = request.input('diasxllegarproducto')
       let produccionxfacturar = request.input('produccionxfacturar')
 
-      const producto = await Database.raw("update public.producto set codigointerno ='" + codigointerno + "', codigobarra = '" + codigobarra + "', pvp1 = '" + pvp1 + "', pvp2 = '" + pvp2 + "', ucosto = '" + ucosto + "', descripcion = '" + descripcion + "', codmarca = '" + codmarca + "', tieneiva = '" + tieneiva + "', recargariva = '" + recargariva + "', tieneice = '" + tieneice + "', recargarice = '" + recargarice + "', porcentajeice = '" + porcentajeice + "', codmedida = '" + codmedida + "', idcategoria = '" + idcategoria + "', estado = '" + estado + "', multiplos = '" + multiplos + "', nota = '" + nota + "', costopromedio = '" + costopromedio + "', esservicio = '" + esservicio + "', peso = '" + peso + "', volumen = '" + volumen + "', area = '" + area + "', dimlargo = '" + dimlargo + "', dimalto = '" + dimalto + "', dimancho = '" + dimancho + "', espadre = '" + espadre + "', eshijode = '" + eshijode + "', factorconversion = '" + factorconversion + "', escompuesto = '" + escompuesto + "', usaetiqueta = '" + usaetiqueta + "', imagen = '" + imagen + "', diasxllegarproducto = '" + diasxllegarproducto + "', produccionxfacturar = '" + produccionxfacturar + "' where id = '" + idproducto + "'")
+      const producto = await Database.raw("update public.producto set codigobarra = '" + codigobarra + "', pvp1 = '" + pvp1 + "', pvp2 = '" + pvp2 + "', ucosto = '" + ucosto + "', descripcion = '" + descripcion + "', codmarca = '" + codmarca + "', tieneiva = '" + tieneiva + "', recargariva = '" + recargariva + "', tieneice = '" + tieneice + "', recargarice = '" + recargarice + "', porcentajeice = '" + porcentajeice + "', codmedida = '" + codmedida + "', idcategoria = '" + idcategoria + "', estado = '" + estado + "', multiplos = '" + multiplos + "', nota = '" + nota + "', costopromedio = '" + costopromedio + "', esservicio = '" + esservicio + "', peso = '" + peso + "', volumen = '" + volumen + "', area = '" + area + "', dimlargo = '" + dimlargo + "', dimalto = '" + dimalto + "', dimancho = '" + dimancho + "', espadre = '" + espadre + "', eshijode = '" + eshijode + "', factorconversion = '" + factorconversion + "', escompuesto = '" + escompuesto + "', usaetiqueta = '" + usaetiqueta + "', imagen = '" + imagen + "', diasxllegarproducto = '" + diasxllegarproducto + "', produccionxfacturar = '" + produccionxfacturar + "', fechamod = '"+fechamod+"', exis_minima='"+exis_minima+"', exis_maxima='"+exis_maxima+"' where id = '" + idproducto + "' returning *" )
+
       return response.status(200).send({
-        producto: producto.rows
+        producto: producto.rows,
+        message: 'Se ha modificado el producto correctamente',
+        status: true
       })
     } catch (error) {
       return error

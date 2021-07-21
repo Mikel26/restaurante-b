@@ -4,9 +4,9 @@ const Database = use('Database')
 
 class CategoriaController {
 
-  async consultarCategorias({response}) {
+  async consultarCategorias({ response }) {
     try {
-      const categoria = await Database.raw("select * from public.categoria")
+      const categoria = await Database.raw("select id, trim(descripcion) as descripcion, trim(abreviacion) as abreviacion from public.categoria where estado = true")
 
       return response.status(200).send({
         categorias: categoria.rows
@@ -17,10 +17,10 @@ class CategoriaController {
     }
   }
 
-  async consultarCategoriasFiltro({response, params}) {
+  async consultarCategoriasFiltro({ response, params }) {
     let idcategoria = params.idcategoria
     try {
-      const categoria = await Database.raw("select * from public.categoria where id = '"+idcategoria+"'")
+      const categoria = await Database.raw("select * from public.categoria where id = '" + idcategoria + "'")
 
       return response.status(200).send({
         categorias: categoria.rows
@@ -31,7 +31,7 @@ class CategoriaController {
     }
   }
 
-  async insertarCategoria({request, response}) {
+  async insertarCategoria({ request, response }) {
     try {
       let descripcion = request.input('descripcion')
       let abreviacion = request.input('abreviacion')
@@ -40,14 +40,16 @@ class CategoriaController {
       if (existe.rows.length >= 1) {
 
         return response.status(200).send({
-          message: 'Ya existe un categoría con esa abreviación'
+          message: 'Ya existe un categoría con esa abreviación',
+          status: false
         })
 
       } else {
         const categoria = await Database.raw("insert into public.categoria (descripcion, abreviacion, estado) values (trim('" + descripcion + "'), trim('" + abreviacion + "'), '" + estado + "') returning id, trim(descripcion) as descripcion, trim(abreviacion) as abreviacion")
         return response.status(200).send({
           message: 'Se ha registrado la categoría correctamente',
-          categoria: categoria.rows
+          categoria: categoria.rows,
+          status: true
         })
       }
     } catch (error) {
@@ -65,6 +67,7 @@ class CategoriaController {
       const categoria = await Database.raw("update public.categoria set descripcion = '" + descripcion + "', abreviacion = '" + abreviacion + "' where id = '" + idcategoria + "' returning id, trim(descripcion) as descripcion, trim(abreviacion) as abreviacion, estado")
       return response.status(200).send({
         message: 'Se ha modificado la categoría correctamente',
+        status: true,
         categoria: categoria.rows
       })
 
@@ -74,10 +77,10 @@ class CategoriaController {
     }
   }
 
-  async eliminarCategoria({params, response}) {
+  async eliminarCategoria({ params, response }) {
     try {
       let idcategoria = params.idcategoria
-      const existe = await Database.raw("select * from public.categoria where id='"+idcategoria+"'")
+      const existe = await Database.raw("select * from public.categoria where id='" + idcategoria + "'")
       if (existe.rows.length > 0) {
         const categoria = await Database.raw("update public.categoria set estado = false where id = '" + idcategoria + "'")
 

@@ -6,7 +6,7 @@ class MarcaController {
 
   async consultarMarcas({response}) {
     try {
-      const marca = await Database.raw("select * from public.marca")
+      const marca = await Database.raw("select id, trim(descripcion) as descripcion from public.marca where estado = true")
 
       return response.status(200).send({
         marcas: marca.rows
@@ -24,13 +24,15 @@ class MarcaController {
       const existe = await Database.raw("select id, descripcion from public.marca where estado and descripcion='" + descripcion + "' ")
       if (existe.rows.length > 0) {
         return response.status(200).send({
-          message: 'Ya existe una marca con esa descripción'
+          message: 'Ya existe una marca con esa descripción',
+          status: false
         })
       } else {
         const marca = await Database.raw("insert into public.marca (descripcion, estado) values ('" + descripcion + "', '" + estado + "') returning id, trim(descripcion)")
         return response.status(200).send({
           message: 'Se ha registrado la marca correctamente',
-          marca: marca.rows
+          marca: marca.rows,
+          status: true
         })
       }
     } catch (error) {
@@ -47,6 +49,7 @@ class MarcaController {
       const marca = await Database.raw("update public.marca set descripcion = '" + descripcion + "' where id = '" + idmarca + "' returning id, trim(descripcion) as descripcion, estado")
       return response.status(200).send({
         message: 'Se ha modificado la marca correctamente',
+        status: true,
         marca: marca.rows
       })
 
@@ -79,6 +82,7 @@ class MarcaController {
   
         return response.status(200).send({
           message: 'Se ha eliminado la marca correctamente',
+          status: true,
           marca: marca.rows
         })
       } else {
